@@ -87,6 +87,8 @@ export default function AddEntryModal({
             <option>Food</option>
             <option>Travel</option>
             <option>Shopping</option>
+            <option>Entertainment</option>
+            <option>Bills</option>            
             <option>Other</option>
           </select>
         </div>

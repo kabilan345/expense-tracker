@@ -9,13 +9,13 @@ export default function BalanceCard({ trend, salary }) {
   return (
     <div className="card">
 
-      <p className="label">Total Balance</p>
+      <h3>Total Balance</h3>
 
       <h1 className="value">
         ₹{values.length ? values[values.length - 1] : salary}
       </h1>
 
-      <div style={{ height: 160 }}>
+      <div style={{ height: 260 }}>
         <Line
           data={{
             labels,
@@ -28,10 +28,12 @@ export default function BalanceCard({ trend, salary }) {
             }]
           }}
           options={{
-            plugins: {
-              legend: { display: false }
-            }
-          }}
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false }
+  }
+}}
         />
       </div>
 

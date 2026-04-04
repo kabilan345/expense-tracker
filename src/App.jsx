@@ -21,6 +21,7 @@ function App() {
 
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
+  const [hideToast, setHideToast] = useState(false);
 
   const [monthly, setMonthly] = useState({
     expense: 0,
@@ -124,13 +125,20 @@ function App() {
   });
 
   // 🔔 Toast helper
-  const showToast = (msg, type = "success") => {
-    setToast({ message: msg, type });
+const showToast = (msg, type = "success") => {
+  setToast({ message: msg, type });
+  setHideToast(false);
 
-    setTimeout(() => {
-      setToast(null);
-    }, 2000);
-  };
+  // Start fade-out after 2s
+  setTimeout(() => {
+    setHideToast(true);
+  }, 2000);
+
+  // Remove after animation completes
+  setTimeout(() => {
+    setToast(null);
+  }, 2400);
+};
 
   // ➕ Add Entry
   const handleAddEntry = (entry) => {
@@ -149,7 +157,7 @@ function App() {
     });
 
     setData(newData);
-    showToast("Entry Added ✅", "success");
+    showToast("Entry Added", "success");
   };
 
   // 🗑️ Delete Entry
@@ -157,7 +165,7 @@ function App() {
     const newData = JSON.parse(JSON.stringify(data));
     newData[month][day].splice(index, 1);
     setData(newData);
-    showToast("Entry Deleted ❌", "error");
+    showToast("Entry Deleted", "error");
   };
 
   // ✏️ Edit Entry
@@ -165,7 +173,7 @@ function App() {
     const newData = JSON.parse(JSON.stringify(data));
     newData[month][day][index] = updatedEntry;
     setData(newData);
-    showToast("Entry Updated ✏️", "warning");
+    showToast("Entry Updated", "warning");
   };
 
   return (
@@ -225,9 +233,10 @@ function App() {
       <div className="dashboard">
 
         <BalanceCard
-          salary={salaryData[month] || 0}
-          trend={balanceTrend}
-        />
+  salary={salaryData[month] || 0}
+  trend={balanceTrend}
+  transactions={transactions}
+/>
 
         <SummaryCard monthly={monthly} />
 
@@ -251,8 +260,12 @@ function App() {
 
       {/* TOAST */}
       {toast && (
-        <Toast message={toast.message} type={toast.type} />
-      )}
+  <Toast
+    message={toast.message}
+    type={toast.type}
+    hide={hideToast}
+  />
+)}
 
     </div>
   );

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const icons = {
   Food: "🍴",
   Travel: "🚗",
   Shopping: "🛒",
-  Other: "📦"
+  Other: "📦",
+  Entertainment: "🎬",
+  Bills: "💡"
 };
 
 export default function Transactions({ transactions, deleteEntry, editEntry }) {
@@ -12,6 +14,8 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [swiped, setSwiped] = useState(null);
+  const startX = useRef(0);
+  const currentX = useRef(0);
 
   const grouped = {};
   transactions.forEach(t => {
@@ -24,6 +28,7 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
   return (
     <div className="card" style={{ marginTop: 20 }}>
       <h3>Recent Transactions</h3>
+      
 
       {days.map(day => (
         <div key={day} style={{ marginBottom: 15 }}>
@@ -38,16 +43,43 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
               <div
                 key={i}
                 className={`txn-container ${isSwiped ? "swiped" : ""}`}
-                onTouchStart={(e) => {
-                  const startX = e.touches[0].clientX;
+                onTouchMove={(e) => {
+  currentX.current = e.touches[0].clientX;
+  const diff = startX.current - currentX.current;
 
-                  const handleMove = (ev) => {
-                    const diff = startX - ev.touches[0].clientX;
-                    if (diff > 50) setSwiped(key); // swipe left
-                  };
+  // LEFT SWIPE (open)
+if (diff > 0 && diff < 100) {
+  e.currentTarget.style.transform = `translateX(-${diff}px)`;
+}
 
-                  e.target.addEventListener("touchmove", handleMove, { once: true });
-                }}
+// RIGHT SWIPE (close)
+if (diff < 0 && Math.abs(diff) < 100) {
+  e.currentTarget.style.transform = `translateX(${Math.abs(diff)}px)`;
+}
+}}
+
+onTouchEnd={(e) => {
+  const diff = startX.current - currentX.current;
+
+  // SWIPE LEFT → OPEN
+  if (diff > 60) {
+    setSwiped(key);
+    e.currentTarget.style.transform = "translateX(-80px)";
+  }
+
+  // SWIPE RIGHT → CLOSE
+  else if (diff < -40) {
+    setSwiped(null);
+    e.currentTarget.style.transform = "translateX(0)";
+  }
+
+  // SMALL MOVE → RESET
+  else {
+    e.currentTarget.style.transform = isSwiped
+      ? "translateX(-80px)"
+      : "translateX(0)";
+  }
+}}
               >
 
                 {isEditing ? (
@@ -80,6 +112,8 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
                       <option>Food</option>
                       <option>Travel</option>
                       <option>Shopping</option>
+                      <option>Entertainment</option>
+                      <option>Bills</option>
                       <option>Other</option>
                     </select>
 
