@@ -144,7 +144,7 @@ const showToast = (msg, type = "success") => {
   const handleAddEntry = (entry) => {
     const day = entry.date.split("-")[2];
 
-    const newData = JSON.parse(JSON.stringify(data));
+    const newData = structuredClone(data);
 
     if (!newData[month]) newData[month] = {};
     if (!newData[month][day]) newData[month][day] = [];
