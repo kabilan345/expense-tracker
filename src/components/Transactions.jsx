@@ -9,6 +9,8 @@ const icons = {
   Bills: "💡"
 };
 
+
+
 export default function Transactions({ transactions, deleteEntry, editEntry }) {
 
   const [editing, setEditing] = useState(null);
@@ -16,6 +18,8 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
   const [swiped, setSwiped] = useState(null);
   const startX = useRef(0);
   const currentX = useRef(0);
+
+  const isMobile = window.innerWidth <= 768;
 
   const grouped = {};
   transactions.forEach(t => {
@@ -52,13 +56,14 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
                 }}
 
                 onTouchEnd={() => {
-                  const diff = startX.current - currentX.current;
-
-                  if (diff > 60) {
-                    setSwiped(key);
-                  } else if (diff < -40) {
-                    setSwiped(null);
-                  }
+  const diff = startX.current - currentX.current;
+  if (diff > 50) {
+    setSwiped(key);
+  } else if (diff < -30) {
+    setSwiped(null);
+  } else {
+    setSwiped(null);
+  }
                 }}
               >
 
@@ -123,13 +128,7 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
                 ) : (
                   <>
                     {/* ✅ ONLY CONTENT MOVES */}
-                    <div
-                      className="txn-swipe-content"
-                      style={{
-                        transform: isSwiped ? "translateX(-80px)" : "translateX(0)",
-                        transition: "transform 0.25s ease"
-                      }}
-                    >
+                    <div className="txn-swipe-content">
                       <div className="txn-content">
                         <div>
                           {icons[t.category]} ₹{t.amount}
@@ -141,20 +140,25 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
                     </div>
 
                     {/* ✅ BUTTONS STAY FIXED */}
-                    <div className="txn-actions">
-                      <button
-                        onClick={() => {
-                          setEditing(key);
-                          setForm(t);
-                        }}
-                      >
-                        ✏️
-                      </button>
 
-                      <button onClick={() => deleteEntry(day, i)}>
-                        🗑️
-                      </button>
-                    </div>
+{/* BUTTONS */}
+<div
+  className="txn-actions"
+  style={isMobile ? {
+    position: "absolute",
+    right: isSwiped ? "0" : "-110px",
+    top: 0,
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "0 6px",
+    transition: "right 0.25s ease"
+  } : {}}
+>
+  <button onClick={() => { setEditing(key); setForm(t); }}>✏️</button>
+  <button onClick={() => deleteEntry(day, i)}>🗑️</button>
+</div>
                   </>
                 )}
               </div>

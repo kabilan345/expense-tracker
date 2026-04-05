@@ -467,13 +467,6 @@ input:focus, select:focus {
 
   touch-action: pan-y;
 }
-
-/* While dragging */
-/* .txn-container:active {
-  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-  transform: scale(0.98);
-} */
-
 /* MAIN CONTENT */
 .txn-content {
   flex: 1;
@@ -499,7 +492,6 @@ input:focus, select:focus {
   display: flex;
   gap: 10px;
   align-items: center;
-  position: static;
   transition: 0.3s;
 }
 
@@ -546,7 +538,6 @@ input:focus, select:focus {
 @media (max-width: 768px) {
 
   .txn-actions {
-    right: 0;
     width: 100px;
     height: 100%;
     display: flex;
