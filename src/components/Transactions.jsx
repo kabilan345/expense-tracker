@@ -28,7 +28,6 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
   return (
     <div className="card" style={{ marginTop: 20 }}>
       <h3>Recent Transactions</h3>
-      
 
       {days.map(day => (
         <div key={day} style={{ marginBottom: 15 }}>
@@ -43,43 +42,24 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
               <div
                 key={i}
                 className={`txn-container ${isSwiped ? "swiped" : ""}`}
+
+                onTouchStart={(e) => {
+                  startX.current = e.touches[0].clientX;
+                }}
+
                 onTouchMove={(e) => {
-  currentX.current = e.touches[0].clientX;
-  const diff = startX.current - currentX.current;
+                  currentX.current = e.touches[0].clientX;
+                }}
 
-  // LEFT SWIPE (open)
-if (diff > 0 && diff < 100) {
-  e.currentTarget.style.transform = `translateX(-${diff}px)`;
-}
+                onTouchEnd={() => {
+                  const diff = startX.current - currentX.current;
 
-// RIGHT SWIPE (close)
-if (diff < 0 && Math.abs(diff) < 100) {
-  e.currentTarget.style.transform = `translateX(${Math.abs(diff)}px)`;
-}
-}}
-
-onTouchEnd={(e) => {
-  const diff = startX.current - currentX.current;
-
-  // SWIPE LEFT → OPEN
-  if (diff > 60) {
-    setSwiped(key);
-    e.currentTarget.style.transform = "translateX(-80px)";
-  }
-
-  // SWIPE RIGHT → CLOSE
-  else if (diff < -40) {
-    setSwiped(null);
-    e.currentTarget.style.transform = "translateX(0)";
-  }
-
-  // SMALL MOVE → RESET
-  else {
-    e.currentTarget.style.transform = isSwiped
-      ? "translateX(-80px)"
-      : "translateX(0)";
-  }
-}}
+                  if (diff > 60) {
+                    setSwiped(key);
+                  } else if (diff < -40) {
+                    setSwiped(null);
+                  }
+                }}
               >
 
                 {isEditing ? (
@@ -142,17 +122,25 @@ onTouchEnd={(e) => {
                   </div>
                 ) : (
                   <>
-                    {/* MAIN CONTENT */}
-                    <div className="txn-content">
-                      <div>
-                        {icons[t.category]} ₹{t.amount}
-                        <div className="txn-note">
-                          {t.category} - {t.note}
+                    {/* ✅ ONLY CONTENT MOVES */}
+                    <div
+                      className="txn-swipe-content"
+                      style={{
+                        transform: isSwiped ? "translateX(-80px)" : "translateX(0)",
+                        transition: "transform 0.25s ease"
+                      }}
+                    >
+                      <div className="txn-content">
+                        <div>
+                          {icons[t.category]} ₹{t.amount}
+                          <div className="txn-note">
+                            {t.category} - {t.note}
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* ACTIONS */}
+                    {/* ✅ BUTTONS STAY FIXED */}
                     <div className="txn-actions">
                       <button
                         onClick={() => {

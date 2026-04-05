@@ -271,7 +271,9 @@ input:focus, select:focus {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 /* 🔥 MODAL */
@@ -280,7 +282,7 @@ input:focus, select:focus {
   max-width: 420px;
   background: var(--bg-secondary);
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px;
   border: 1px solid var(--border-color);
   backdrop-filter: blur(20px);
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
@@ -288,6 +290,10 @@ input:focus, select:focus {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 90vh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  box-sizing: border-box; 
 }
 
 /* 🔥 MODAL ROW */
@@ -323,13 +329,17 @@ input:focus, select:focus {
 }
 
 .summary-bottom {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
   margin-top: 10px;
 }
+
 .summary-chart {
-  flex: 0 0 140px;
+  flex: 0 0 160px;  
+  width: 160px;
+  height: 160px;
 }
 
 .summary-categories {
@@ -337,15 +347,15 @@ input:focus, select:focus {
   flex: 1;
   flex-direction: column;
   gap: 10px;
-  width: auto;
+  align-items: flex-start;
 }
 
 /* ROW */
 .cat-row {
   display: grid;
-  grid-template-columns: 16px 1fr 70px 40px;
+  grid-template-columns: 12px 1fr auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .cat-row span:nth-child(3),
@@ -536,18 +546,12 @@ input:focus, select:focus {
 @media (max-width: 768px) {
 
   .txn-actions {
-    position: absolute;
     right: 0;
-    width: 90px;
+    width: 100px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    background: linear-gradient(
-      to left,
-      rgba(0,0,0,0.2),
-      transparent
-    );
   }
 
   .txn-actions button {
@@ -555,38 +559,42 @@ input:focus, select:focus {
     height: 44px;
   }
 
-
-  .toast {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    bottom: 20px;
-    width: 90%;
-    max-width: none;
-  }
-
-    .summary-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .summary-chart {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
     align-self: center;
   }
 
-  .summary-categories {
-    width: 100%;
-    margin-left: 0;
-  }
+  /* .summary-categories {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+} */
 
 }
 
 @media (max-width: 480px) {
+
+    .summary-categories {
+    width: 100%;
+    margin-left: 0;
+    align-items: flex-start;
+  }
+
   .cat-row {
-    grid-template-columns: 16px 1fr auto auto;
+    grid-template-columns: 10px 1fr auto auto;
     font-size: 12px;
+  }
+  .modal {
+    width: 100%; /* 🔥 gives left & right gap */
+    max-width: 100%;
+
+    margin: 0 auto; /* center properly */
+
+    border-radius: 18px;
+    padding: 16px;
   }
 }
 
@@ -595,15 +603,6 @@ input:focus, select:focus {
   .txn-edit input,
   .txn-edit select {
     flex: 1 1 100%;
-  }
-}
-
-/* 🔥 MODAL FULL WIDTH FIX */
-@media (max-width: 425px) {
-  .modal {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 14px;
   }
 }
 
