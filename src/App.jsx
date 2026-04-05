@@ -6,6 +6,9 @@ import Transactions from "./components/Transactions";
 import AddEntryModal from "./components/AddEntryModal";
 import Toast from "./components/Toast";
 import "./App.css";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { setDoc } from "firebase/firestore";
 
 function App() {
 
@@ -37,29 +40,66 @@ function App() {
 
   // 📦 Load Data
   useEffect(() => {
-    setData(JSON.parse(localStorage.getItem("expenseData")) || {});
-    setSalaryData(JSON.parse(localStorage.getItem("salaryData")) || {});
 
     const today = new Date();
     setMonth(today.toISOString().slice(0, 7));
     setDate(today.toISOString().slice(0, 10));
   }, []);
 
-  // 💾 Save Data
-  useEffect(() => {
-    localStorage.setItem("expenseData", JSON.stringify(data));
-  }, [data]);
+  // 💾 Fetch Data from database
+useEffect(() => {
 
-  useEffect(() => {
-    localStorage.setItem("salaryData", JSON.stringify(salaryData));
-  }, [salaryData]);
+  const fetchData = async () => {
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+
+    const newData = {};
+
+    querySnapshot.forEach((docSnap) => {
+      const d = docSnap.data();
+
+      if (!newData[d.month]) newData[d.month] = {};
+      if (!newData[d.month][d.day]) newData[d.month][d.day] = [];
+
+      newData[d.month][d.day].push({
+        type: d.type,
+        amount: d.amount,
+        category: d.category,
+        note: d.note,
+        id: docSnap.id
+      });
+    });
+
+    setData(newData);
+  };
+
+  // 🔥 NEW FUNCTION
+  const fetchSalary = async () => {
+    const querySnapshot = await getDocs(collection(db, "salary"));
+
+    const salaryObj = {};
+
+    querySnapshot.forEach((docSnap) => {
+      const d = docSnap.data();
+
+      salaryObj[docSnap.id] = {
+  amount: d.amount
+};
+    });
+
+    setSalaryData(salaryObj);
+  };
+
+  fetchData();
+  fetchSalary(); // ✅ ADD THIS
+
+}, []);
 
   // 📊 Monthly Calculation
   useEffect(() => {
     const days = data[month] || {};
 
     let total = 0;
-    let balance = salaryData[month] || 0;
+    let balance = salaryData[month]?.amount || 0;
     let cat = {};
 
     Object.values(days).forEach(entries => {
@@ -104,7 +144,7 @@ function App() {
 
   // 📈 Balance Trend
   const balanceTrend = [];
-  let running = salaryData[month] || 0;
+  let running = salaryData[month]?.amount || 0;
 
   const sortedDays = Object.keys(monthData).sort(
     (a, b) => Number(a) - Number(b)
@@ -141,40 +181,65 @@ const showToast = (msg, type = "success") => {
 };
 
   // ➕ Add Entry
-  const handleAddEntry = (entry) => {
-    const day = entry.date.split("-")[2];
+const handleAddEntry = async (entry) => {
+  const day = entry.date.split("-")[2];
 
-    const newData = structuredClone(data);
+  const docRef = await addDoc(collection(db, "transactions"), {
+    type: entry.type,
+    amount: entry.amount,
+    category: entry.category,
+    note: entry.note,
+    month: month,
+    day: day
+  });
 
-    if (!newData[month]) newData[month] = {};
-    if (!newData[month][day]) newData[month][day] = [];
+  const newData = structuredClone(data);
 
-    newData[month][day].push({
-      type: entry.type,
-      amount: entry.amount,
-      category: entry.category,
-      note: entry.note
-    });
+  if (!newData[month]) newData[month] = {};
+  if (!newData[month][day]) newData[month][day] = [];
 
-    setData(newData);
-    showToast("Entry Added", "success");
-  };
+  newData[month][day].push({
+    type: entry.type,
+    amount: entry.amount,
+    category: entry.category,
+    note: entry.note,
+    id: docRef.id
+  });
+
+  setData(newData);
+  showToast("Entry Added", "success");
+};
 
   // 🗑️ Delete Entry
-  const deleteEntry = (day, index) => {
-    const newData = JSON.parse(JSON.stringify(data));
-    newData[month][day].splice(index, 1);
-    setData(newData);
-    showToast("Entry Deleted", "error");
-  };
+const deleteEntry = async (day, index) => {
+  const entry = data[month][day][index];
+
+  await deleteDoc(doc(db, "transactions", entry.id));
+
+  const newData = structuredClone(data);
+  newData[month][day].splice(index, 1);
+
+  setData(newData);
+  showToast("Entry Deleted", "error");
+};
 
   // ✏️ Edit Entry
-  const editEntry = (day, index, updatedEntry) => {
-    const newData = JSON.parse(JSON.stringify(data));
-    newData[month][day][index] = updatedEntry;
-    setData(newData);
-    showToast("Entry Updated", "warning");
+const editEntry = async (day, index, updatedEntry) => {
+  const entry = data[month][day][index];
+
+  await updateDoc(doc(db, "transactions", entry.id), {
+    ...updatedEntry
+  });
+
+  const newData = structuredClone(data);
+  newData[month][day][index] = {
+    ...updatedEntry,
+    id: entry.id
   };
+
+  setData(newData);
+  showToast("Entry Updated", "warning");
+};
 
   return (
     <div className="app">
@@ -201,13 +266,19 @@ const showToast = (msg, type = "success") => {
           <input
             type="number"
             placeholder="Salary"
-            value={salaryData[month] || ""}
-            onChange={(e) =>
-              setSalaryData({
-                ...salaryData,
-                [month]: Number(e.target.value)
-              })
-            }
+            value={salaryData[month]?.amount || ""}
+            onChange={async (e) => {
+  const value = Number(e.target.value);
+
+  await setDoc(doc(db, "salary", month), {
+    amount: value
+  });
+
+  setSalaryData({
+    ...salaryData,
+    [month]: { amount: value }
+  });
+}}
           />
 
           <button
@@ -233,7 +304,7 @@ const showToast = (msg, type = "success") => {
       <div className="dashboard">
 
         <BalanceCard
-  salary={salaryData[month] || 0}
+  salary={salaryData[month]?.amount || 0}
   trend={balanceTrend}
   transactions={transactions}
 />

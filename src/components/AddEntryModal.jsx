@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddEntryModal({
   isOpen,
@@ -15,7 +15,16 @@ export default function AddEntryModal({
     note: ""
   });
 
+  const getLastDay = (month) => {
+  const [year, mon] = month.split("-");
+  return new Date(year, mon, 0).getDate();
+};
+
   const [selectedDate, setSelectedDate] = useState(date);
+
+    useEffect(() => {
+  setSelectedDate(date);
+}, [date]);
 
   if (!isOpen) return null;
 
@@ -51,10 +60,13 @@ export default function AddEntryModal({
         {/* 🔥 ROW 1 */}
         <div className="modal-row">
           <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
+  type="date"
+  value={selectedDate}
+  min={`${month}-01`}
+  max={`${month}-${getLastDay(month)}`}
+  onChange={(e) => setSelectedDate(e.target.value)}
+  onKeyDown={(e) => e.preventDefault()}
+/>
 
           <select
             value={form.type}

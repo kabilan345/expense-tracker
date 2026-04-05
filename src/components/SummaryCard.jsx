@@ -2,7 +2,7 @@ import { Doughnut } from "react-chartjs-2";
 
 export default function SummaryCard({ monthly }) {
 
-  const total = Object.values(monthly.categories || {}).reduce((a, b) => a + b, 0);
+const total = Object.values(monthly.categories || {}).reduce((a, b) => a + b, 0);
 
 const categoryList = Object.entries(monthly.categories || {}).map(([cat, val]) => ({
   category: cat,
