@@ -1,0 +1,191 @@
+/* ===== AUTH PAGE WRAPPER ===== */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-primary);
+  padding: 20px;
+}
+
+.auth-page .register-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== CONTAINER ===== */
+.auth-page .register-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== GLASS CARD ===== */
+.auth-page .register-glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 40px;
+  width: 400px;
+  max-width: 95%;
+  display: flex;
+  flex-direction: column;
+    align-items: center;
+  text-align: center;
+  animation: fadeInUp 0.6s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ===== TITLE ===== */
+.auth-page .title {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, var(--accent), #6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== QUOTE ===== */
+.auth-page .quote {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ===== INPUT GROUP ===== */
+.auth-page .input-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  margin: 10px auto;
+  background: rgba(255,255,255,0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: 0.3s;
+}
+
+.auth-page .input-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* ICON */
+.auth-page .icon {
+  margin-right: 10px;
+  color: var(--accent);
+}
+
+/* INPUT + SELECT */
+.auth-page input,
+.auth-page select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  width: 100%;
+  font-size: 1rem;
+}
+
+/* SELECT DROPDOWN FIX */
+.auth-page select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.auth-page option {
+  background: #1a1a1a;
+  color: white;
+}
+
+/* ===== BUTTON ===== */
+.auth-page .submit-btn {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), #6ee7b7);
+  color: #000;
+  transition: 0.3s;
+}
+
+.auth-page .submit-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
+}
+
+/* ===== LOGIN LINK ===== */
+.auth-page .login-redirect {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+
+.auth-page .title {
+  text-align: center;
+}
+
+
+.auth-page .quote {
+  text-align: center;
+  max-width: 280px;
+}
+
+.auth-page .login-link {
+  color: var(--accent);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-page .register-redirect{
+  text-align: center;
+  width: 100%;
+}
+
+.auth-page .login-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+
+  .auth-page {
+    padding: 15px;
+  }
+
+  .auth-page .register-glass {
+    width: 100%;
+    padding: 25px 20px;
+  }
+
+  .auth-page .title {
+    font-size: 1.5rem;
+  }
+
+  .auth-page .submit-btn {
+    font-size: 0.95rem;
+  }
+}

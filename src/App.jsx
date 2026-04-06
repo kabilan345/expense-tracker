@@ -9,9 +9,14 @@ import "./App.css";
 import { db } from "./firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { setDoc } from "firebase/firestore";
+import { useAuth } from "./Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function App() {
 
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const userId = user?.uid;
   const [data, setData] = useState({});
   const [salaryData, setSalaryData] = useState({});
   const [month, setMonth] = useState("");
@@ -32,6 +37,15 @@ function App() {
     categories: {}
   });
 
+  useEffect(() => {
+    if (loading) {
+  return <div>Loading...</div>;
+}
+  if (!user) {
+    navigate("/login");
+  }
+}, [user]);
+
   // 🌗 APPLY THEME
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -49,8 +63,12 @@ function App() {
   // 💾 Fetch Data from database
 useEffect(() => {
 
+  if (!userId) return; // 🚨 IMPORTANT
+
   const fetchData = async () => {
-    const querySnapshot = await getDocs(collection(db, "transactions"));
+    const querySnapshot = await getDocs(
+      collection(db, "users", userId, "transactions")
+    );
 
     const newData = {};
 
@@ -72,9 +90,10 @@ useEffect(() => {
     setData(newData);
   };
 
-  // 🔥 NEW FUNCTION
   const fetchSalary = async () => {
-    const querySnapshot = await getDocs(collection(db, "salary"));
+    const querySnapshot = await getDocs(
+      collection(db, "users", userId, "salary")
+    );
 
     const salaryObj = {};
 
@@ -82,17 +101,17 @@ useEffect(() => {
       const d = docSnap.data();
 
       salaryObj[docSnap.id] = {
-  amount: d.amount
-};
+        amount: d.amount
+      };
     });
 
     setSalaryData(salaryObj);
   };
 
   fetchData();
-  fetchSalary(); // ✅ ADD THIS
+  fetchSalary();
 
-}, []);
+}, [userId]);
 
   // 📊 Monthly Calculation
   useEffect(() => {
@@ -123,7 +142,9 @@ useEffect(() => {
   }, [data, month, salaryData]);
 
   // ⏳ Loading
-  if (!month || !date) return <div>Loading...</div>;
+  if (!month || !date) {
+  return <div>Loading...</div>;
+}
 
   const monthData = data[month] || {};
 
@@ -184,7 +205,7 @@ const showToast = (msg, type = "success") => {
 const handleAddEntry = async (entry) => {
   const day = entry.date.split("-")[2];
 
-  const docRef = await addDoc(collection(db, "transactions"), {
+  const docRef = await addDoc(collection(db, "users", userId, "transactions"), {
     type: entry.type,
     amount: entry.amount,
     category: entry.category,
@@ -214,7 +235,7 @@ const handleAddEntry = async (entry) => {
 const deleteEntry = async (day, index) => {
   const entry = data[month][day][index];
 
-  await deleteDoc(doc(db, "transactions", entry.id));
+  await deleteDoc(doc(db, "users", userId, "transactions", entry.id));
 
   const newData = structuredClone(data);
   newData[month][day].splice(index, 1);
@@ -227,7 +248,7 @@ const deleteEntry = async (day, index) => {
 const editEntry = async (day, index, updatedEntry) => {
   const entry = data[month][day][index];
 
-  await updateDoc(doc(db, "transactions", entry.id), {
+  await updateDoc(doc(db, "users", userId, "transactions", entry.id), {
     ...updatedEntry
   });
 
@@ -270,7 +291,7 @@ const editEntry = async (day, index, updatedEntry) => {
             onChange={async (e) => {
   const value = Number(e.target.value);
 
-  await setDoc(doc(db, "salary", month), {
+  await setDoc(doc(db, "users", userId, "salary", month), {
     amount: value
   });
 
@@ -286,15 +307,6 @@ const editEntry = async (day, index, updatedEntry) => {
             onClick={() => setShowModal(true)}
           >
             ➕ Add Entry
-          </button>
-
-          <button
-            className="btn-glass"
-            onClick={() =>
-              setTheme(prev => (prev === "dark" ? "light" : "dark"))
-            }
-          >
-            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
           </button>
 
         </div>

@@ -35,7 +35,7 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
 
       {days.map(day => (
         <div key={day} style={{ marginBottom: 15 }}>
-          <h4 className="txn-date">📅 {day}</h4>
+          <h4 className="txn-date">🗓️ {day}</h4>
 
           {grouped[day].map((t, i) => {
             const key = `${day}-${i}`;

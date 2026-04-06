@@ -3,7 +3,7 @@ export default function Toast({ message, type, hide }) {
   const icons = {
     success: "✅",
     error: "❌",
-    warning: "⚠️"
+    warning: "✏️"
   };
 
   return (
