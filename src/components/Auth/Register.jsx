@@ -8,6 +8,7 @@ import maleprofile from '../../assets/male.jpeg';
 import femaleprofile from '../../assets/female.jpeg';
 import './Register.css';
 import { FaUser, FaEnvelope, FaLock, FaVenusMars } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { db } from "../../firebase";
 import { setDoc, doc } from "firebase/firestore";
 
@@ -15,6 +16,7 @@ import { setDoc, doc } from "firebase/firestore";
 const Register = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "", gender: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -82,9 +84,23 @@ await setDoc(doc(db, "users", userCred.user.uid), {
             <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
           </div>
           <div className="input-group">
-            <FaLock className="icon" />
-            <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
-          </div>
+  <FaLock className="icon" />
+
+  <input
+    name="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    onChange={handleChange}
+    required
+  />
+
+  <span
+    className="password-toggle"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
           <div className="input-group">
             <FaVenusMars className="icon" />
             <select name="gender" value={form.gender} onChange={handleChange} required>

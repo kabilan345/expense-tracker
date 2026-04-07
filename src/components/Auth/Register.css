@@ -1,4 +1,20 @@
 /* ===== AUTH PAGE WRAPPER ===== */
+
+/* Hide browser default eye icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"] {
+  appearance: none;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -61,6 +77,7 @@
 .auth-page .input-group {
   display: flex;
   align-items: center;
+  position: relative; /* 🔥 ADD THIS */
   width: 100%;
   max-width: 320px;
   margin: 10px auto;
@@ -68,7 +85,16 @@
   padding: 10px 15px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.1);
-  transition: 0.3s;
+}
+
+.auth-page .password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .auth-page .input-group:hover {
@@ -91,6 +117,7 @@
   color: var(--text-primary);
   width: 100%;
   font-size: 1rem;
+  padding-right: 40px;
 }
 
 /* SELECT DROPDOWN FIX */

@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './Login.css';
 // import logo from '../../assets/logo.png';
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -61,15 +63,23 @@ const Login = () => {
             />
           </div>
           <div className="input-group">
-            <FaLock className="icon" />
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              onChange={handleChange}
-              required
-            />
-          </div>
+  <FaLock className="icon" />
+
+  <input
+    name="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    onChange={handleChange}
+    required
+  />
+
+  <span
+    className="password-toggle"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
 
           <button type="submit" className="submit-btn" disabled={isSubmitting}>
             {isSubmitting ? "Logging in..." : "Login"}
