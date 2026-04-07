@@ -19,6 +19,8 @@ function App() {
   const userId = user?.uid;
   const [data, setData] = useState({});
   const [salaryData, setSalaryData] = useState({});
+  const [salaryInput, setSalaryInput] = useState("");
+  const [savingSalary, setSavingSalary] = useState(false);
   const [month, setMonth] = useState("");
   const [date, setDate] = useState("");
 
@@ -37,14 +39,19 @@ function App() {
     categories: {}
   });
 
-  useEffect(() => {
-    if (loading) {
-  return <div>Loading...</div>;
-}
-  if (!user) {
+useEffect(() => {
+  if (!loading && !user) {
     navigate("/login");
   }
-}, [user]);
+}, [user, loading, navigate]);
+
+useEffect(() => {
+  if (salaryData[month]?.amount !== undefined) {
+    setSalaryInput(salaryData[month].amount);
+  } else {
+    setSalaryInput("");
+  }
+}, [month, salaryData]);
 
   // 🌗 APPLY THEME
   useEffect(() => {
@@ -262,6 +269,10 @@ const editEntry = async (day, index, updatedEntry) => {
   showToast("Entry Updated", "warning");
 };
 
+if (loading) {
+  return <div>Loading...</div>;
+}
+
   return (
     <div className="app">
 
@@ -272,7 +283,7 @@ const editEntry = async (day, index, updatedEntry) => {
       <div className="header">
 
         <div>
-          <h2 style={{ margin: 0 }}>Hello, Kabilan 👋</h2>
+          <h2 style={{ margin: 0 }}>Hello, {user?.displayName} 👋</h2>
           <p style={{ color: "var(--text-secondary)" }}>{month}</p>
         </div>
 
@@ -284,23 +295,48 @@ const editEntry = async (day, index, updatedEntry) => {
             onChange={(e) => setMonth(e.target.value)}
           />
 
-          <input
-            type="number"
-            placeholder="Salary"
-            value={salaryData[month]?.amount || ""}
-            onChange={async (e) => {
-  const value = Number(e.target.value);
+<input
+  type="number"
+  placeholder="Salary"
+  value={salaryInput}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (value >= 0) {
+      setSalaryInput(value);
+    }
+  }}
+/>
 
-  await setDoc(doc(db, "users", userId, "salary", month), {
-    amount: value
-  });
+<button
+  className="btn-glass"
+  disabled={savingSalary}
+  onClick={async () => {
 
-  setSalaryData({
-    ...salaryData,
-    [month]: { amount: value }
-  });
-}}
-          />
+    if (!salaryInput) {
+      showToast("Enter salary first", "error");
+      return;
+    }
+
+    setSavingSalary(true); // ✅ START LOADING
+
+    const value = Number(salaryInput);
+
+    await setDoc(doc(db, "users", userId, "salary", month), {
+      amount: value
+    });
+
+    setSalaryData({
+      ...salaryData,
+      [month]: { amount: value }
+    });
+
+    showToast("Salary Updated", "success");
+
+    setSavingSalary(false); // ✅ STOP LOADING
+  }}
+>
+  {savingSalary ? "Saving..." : "💾 Save Salary"}
+</button>
 
           <button
             className="btn-success"
