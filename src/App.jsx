@@ -27,6 +27,8 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
   const [hideToast, setHideToast] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
   const [monthly, setMonthly] = useState({
     expense: 0,
@@ -105,58 +107,81 @@ useEffect(() => {
     setSalaryData(salaryObj);
   };
 
-  fetchData();
-  fetchSalary();
+Promise.all([fetchData(), fetchSalary()])
+    .finally(() => setIsFetching(false));
 
 }, [userId]);
 
-  // 📊 Monthly Calculation
-  useEffect(() => {
-    const days = data[month] || {};
+// 📊 Monthly Calculation
+useEffect(() => {
+  const days = data[month] || {};
 
-    let total = 0;
-    let balance = salaryData[month]?.amount || 0;
-    let cat = {};
+  let totalExpense = 0;
+  let totalCredit = 0;
+  let balance = salaryData[month]?.amount || 0;
+  let expenseCat = {};  // sum of all expenses per category
+  let creditCat = {};   // sum of all credits per category
 
-Object.values(days).forEach(entries => {
-  entries.forEach(e => {
-    if (e.type === "expense") {
-      total += e.amount;
-      cat[e.category] = (cat[e.category] || 0) + e.amount;
-      balance -= e.amount;
-    } else {
-      // Credit: reduce from that category if it exists, increase balance
-      if (cat[e.category]) {
-        cat[e.category] = Math.max(0, cat[e.category] - e.amount);
+  // STEP 1: Collect expenses and credits separately
+  Object.values(days).forEach(entries => {
+    entries.forEach(e => {
+      if (e.type === "expense") {
+        totalExpense += e.amount;
+        expenseCat[e.category] = (expenseCat[e.category] || 0) + e.amount;
+        balance -= e.amount;
+      } else {
+        totalCredit += e.amount;
+        creditCat[e.category] = (creditCat[e.category] || 0) + e.amount;
+        balance += e.amount;
       }
-      balance += e.amount;
-      total = Math.max(0, total - e.amount); // net expense reduces
-    }
-  });
-});
-
-// Remove categories that netted to 0
-Object.keys(cat).forEach(k => {
-  if (cat[k] === 0) delete cat[k];
-});
-
-    setMonthly({
-      expense: total,
-      balance,
-      categories: cat
     });
+  });
 
-  }, [data, month, salaryData]);
+  // STEP 2: Net each category (expense - credit), minimum 0
+  const cat = {};
+  Object.keys(expenseCat).forEach(k => {
+    const net = expenseCat[k] - (creditCat[k] || 0);
+    if (net > 0) cat[k] = net;
+  });
 
-  // ⏳ Loading
-// ✅ STEP 1: Wait for Firebase auth first
-if (loading) {
-  return <div>Loading...</div>;
-}
+  // STEP 3: Net total expense shown = totalExpense - totalCredit, minimum 0
+  const netExpense = Math.max(0, totalExpense - totalCredit);
 
-// ✅ STEP 2: Then wait for date/month to be set
-if (!month || !date) {
-  return <div>Loading...</div>;
+  setMonthly({
+    expense: netExpense,
+    balance,
+    categories: cat
+  });
+
+}, [data, month, salaryData]);
+
+// ⏳ Loading
+if (loading || !month || !date) {
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      background: "var(--bg-primary)",
+      zIndex: 9999,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "16px"
+    }}>
+      <div style={{
+        width: 48,
+        height: 48,
+        border: "4px solid rgba(255,255,255,0.2)",
+        borderTop: "4px solid var(--accent)",
+        borderRadius: "50%",
+        animation: "spin 0.8s linear infinite"
+      }} />
+      <p style={{ color: "var(--text-secondary)", fontSize: "15px", margin: 0 }}>
+        Loading your data...
+      </p>
+    </div>
+  );
 }
 
   const monthData = data[month] || {};
@@ -216,70 +241,101 @@ const showToast = (msg, type = "success") => {
 
   // ➕ Add Entry
 const handleAddEntry = async (entry) => {
-  const day = entry.date.split("-")[2];
-
-  const docRef = await addDoc(collection(db, "users", userId, "transactions"), {
-    type: entry.type,
-    amount: entry.amount,
-    category: entry.category,
-    note: entry.note,
-    month: month,
-    day: day
-  });
-
-  const newData = structuredClone(data);
-
-  if (!newData[month]) newData[month] = {};
-  if (!newData[month][day]) newData[month][day] = [];
-
-  newData[month][day].push({
-    type: entry.type,
-    amount: entry.amount,
-    category: entry.category,
-    note: entry.note,
-    id: docRef.id
-  });
-
-  setData(newData);
-  showToast("Entry Added", "success");
+  setIsProcessing(true);
+  try {
+    const day = entry.date.split("-")[2];
+    const docRef = await addDoc(collection(db, "users", userId, "transactions"), {
+      type: entry.type,
+      amount: entry.amount,
+      category: entry.category,
+      note: entry.note,
+      month: month,
+      day: day
+    });
+    const newData = structuredClone(data);
+    if (!newData[month]) newData[month] = {};
+    if (!newData[month][day]) newData[month][day] = [];
+    newData[month][day].push({
+      type: entry.type,
+      amount: entry.amount,
+      category: entry.category,
+      note: entry.note,
+      id: docRef.id
+    });
+    setData(newData);
+    showToast("Entry Added", "success");
+  } finally {
+    setIsProcessing(false);
+  }
 };
 
   // 🗑️ Delete Entry
 const deleteEntry = async (day, index) => {
-  const entry = data[month][day][index];
-
-  await deleteDoc(doc(db, "users", userId, "transactions", entry.id));
-
-  const newData = structuredClone(data);
-  newData[month][day].splice(index, 1);
-
-  setData(newData);
-  showToast("Entry Deleted", "error");
+  setIsProcessing(true);
+  try {
+    const entry = data[month][day][index];
+    await deleteDoc(doc(db, "users", userId, "transactions", entry.id));
+    const newData = structuredClone(data);
+    newData[month][day].splice(index, 1);
+    setData(newData);
+    showToast("Entry Deleted", "error");
+  } finally {
+    setIsProcessing(false);
+  }
 };
 
   // ✏️ Edit Entry
 const editEntry = async (day, index, updatedEntry) => {
-  const entry = data[month][day][index];
-
-  await updateDoc(doc(db, "users", userId, "transactions", entry.id), {
-    ...updatedEntry
-  });
-
-  const newData = structuredClone(data);
-  newData[month][day][index] = {
-    ...updatedEntry,
-    id: entry.id
-  };
-
-  setData(newData);
-  showToast("Entry Updated", "warning");
+  setIsProcessing(true);
+  try {
+    const entry = data[month][day][index];
+    await updateDoc(doc(db, "users", userId, "transactions", entry.id), {
+      ...updatedEntry
+    });
+    const newData = structuredClone(data);
+    newData[month][day][index] = {
+      ...updatedEntry,
+      id: entry.id
+    };
+    setData(newData);
+    showToast("Entry Updated", "warning");
+  } finally {
+    setIsProcessing(false);
+  }
 };
 
-  return (
-    <div className="app">
+return (
+  <div className="app">
 
-      {/* NAVBAR */}
-      <Navbar />
+    {/* GLOBAL LOADING OVERLAY */}
+    {(isProcessing || isFetching) && (
+      <div style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.5)",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "16px"
+      }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          border: "4px solid rgba(255,255,255,0.2)",
+          borderTop: "4px solid var(--accent)",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite"
+        }} />
+        <p style={{ color: "white", fontSize: "15px", margin: 0 }}>
+          Please wait...
+        </p>
+      </div>
+    )}
+
+    {/* NAVBAR */}
+    <Navbar />
 
       {/* HEADER */}
       <div className="header">
