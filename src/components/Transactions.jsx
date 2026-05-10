@@ -19,19 +19,61 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
   const startX = useRef(0);
   const currentX = useRef(0);
 
-  const isMobile = window.innerWidth <= 768;
 
-  const grouped = {};
-  transactions.forEach(t => {
-    if (!grouped[t.day]) grouped[t.day] = [];
-    grouped[t.day].push(t);
-  });
+const [filterType, setFilterType] = useState("All");
+const [filterCategory, setFilterCategory] = useState("All");
+
+const types = ["All", "Expense", "Credit"];
+const categories = ["All", "Food", "Travel", "Shopping", "Entertainment", "Bills", "Other"];
+
+const filtered = transactions.filter(t => {
+  const typeMatch = filterType === "All" || t.type === filterType.toLowerCase();
+  const categoryMatch = filterCategory === "All" || t.category === filterCategory;
+  return typeMatch && categoryMatch;
+});
+
+const grouped = {};
+filtered.forEach(t => {
+  if (!grouped[t.day]) grouped[t.day] = [];
+  grouped[t.day].push(t);
+});
 
   const days = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
 
   return (
     <div className="card" style={{ marginTop: 20 }}>
       <h3>Recent Transactions</h3>
+
+<div style={{
+  display: "flex",
+  gap: "10px",
+  margin: "10px 0",
+  flexWrap: "wrap"
+}}>
+
+  {/* TYPE FILTER */}
+  <select
+    value={filterType}
+    onChange={(e) => setFilterType(e.target.value)}
+    style={{ flex: 1, minWidth: "120px" }}
+  >
+    {types.map(t => (
+      <option key={t} value={t}>{t}</option>
+    ))}
+  </select>
+
+  {/* CATEGORY FILTER */}
+  <select
+    value={filterCategory}
+    onChange={(e) => setFilterCategory(e.target.value)}
+    style={{ flex: 1, minWidth: "140px" }}
+  >
+    {categories.map(cat => (
+      <option key={cat} value={cat}>{cat}</option>
+    ))}
+  </select>
+
+</div>
 
       {days.map(day => (
         <div key={day} style={{ marginBottom: 15 }}>
@@ -129,33 +171,26 @@ export default function Transactions({ transactions, deleteEntry, editEntry }) {
                   <>
                     {/* ✅ ONLY CONTENT MOVES */}
                     <div className="txn-swipe-content">
-                      <div className="txn-content">
-                        <div>
-                          {icons[t.category]} ₹{t.amount}
-                          <div className="txn-note">
-                            {t.category} - {t.note}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+  <div className="txn-content">
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <span style={{ fontSize: "22px" }}>{icons[t.category]}</span>
+      <div>
+        <span style={{
+          fontWeight: "bold",
+          color: t.type === "credit" ? "var(--green)" : "var(--red)"
+        }}>
+          {t.type === "credit" ? "+" : "-"}₹{t.amount}
+        </span>
+        <div className="txn-note">{t.category} - {t.note}</div>
+      </div>
+    </div>
+  </div>
+</div>
 
                     {/* ✅ BUTTONS STAY FIXED */}
 
 {/* BUTTONS */}
-<div
-  className="txn-actions"
-  style={isMobile ? {
-    position: "absolute",
-    right: isSwiped ? "0" : "-110px",
-    top: 0,
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    padding: "0 6px",
-    transition: "right 0.25s ease"
-  } : {}}
->
+<div className="txn-actions">
   <button onClick={() => { setEditing(key); setForm(t); }}>✏️</button>
   <button onClick={() => deleteEntry(day, i)}>🗑️</button>
 </div>

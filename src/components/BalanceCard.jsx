@@ -15,7 +15,7 @@ export default function BalanceCard({ trend, salary }) {
         ₹{values.length ? values[values.length - 1] : salary}
       </h1>
 
-      <div style={{ height: 260 }}>
+      <div style={{ height: "min(260px, 40vw)" }}>
         <Line
           data={{
             labels,

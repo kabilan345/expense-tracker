@@ -1,0 +1,272 @@
+/* ============================================================
+   AUTH.CSS — shared styles for Login and Register pages
+   Import this in both Login.jsx and Register.jsx instead of
+   their individual CSS files:
+     import '../../styles/Auth.css';
+   ============================================================ */
+
+/* ============================================================
+   HIDE BROWSER PASSWORD EYE / AUTOFILL ICONS
+   ============================================================ */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"] {
+  appearance: none;
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-primary);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   GLASS CARD  (used by both .login-glass and .register-glass)
+   ============================================================ */
+.auth-page .login-glass,
+.auth-page .register-glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  width: 400px;
+  max-width: 95%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: authFadeInUp 0.6s ease;
+}
+
+/* ============================================================
+   FORM WRAPPERS
+   ============================================================ */
+.auth-page .login-form,
+.auth-page .register-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+.auth-page .login-title {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+  background: linear-gradient(90deg, #00c9ff, #92fe9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-page .register-title {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent), #6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============================================================
+   QUOTE / SUBTITLE
+   ============================================================ */
+.auth-page .login-quote,
+.auth-page .register-quote {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 280px;
+}
+
+/* ============================================================
+   INPUT GROUP
+   ============================================================ */
+.auth-page .input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  margin: 10px auto;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.auth-page .input-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon inside input group */
+.auth-page .icon {
+  margin-right: 10px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Text input */
+.auth-page input {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding-right: 36px;
+  color: var(--text-primary);
+  width: 100%;
+  font-size: 1rem;
+}
+
+.auth-page input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Select (Register gender field) */
+.auth-page select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  width: 100%;
+  font-size: 1rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+.auth-page option {
+  background: #1a1a1a;
+  color: white;
+}
+
+[data-theme="light"] .auth-page option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* Password show/hide toggle */
+.auth-page .password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+.auth-page .submit-btn {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), #6ee7b7);
+  color: #000;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.auth-page .submit-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
+}
+
+.auth-page .submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   REDIRECT LINKS  (e.g. "Don't have an account? Register here")
+   ============================================================ */
+.auth-page .register-redirect,
+.auth-page .login-redirect {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  width: 100%;
+}
+
+.auth-page .register-link,
+.auth-page .login-link {
+  color: var(--accent);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-page .register-link:hover,
+.auth-page .login-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   ENTRANCE ANIMATION
+   ============================================================ */
+@keyframes authFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 15px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+
+  .auth-page .login-glass,
+  .auth-page .register-glass {
+    width: 100%;
+    padding: 25px 20px;
+  }
+
+  .auth-page .login-title,
+  .auth-page .register-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-page .submit-btn {
+    font-size: 0.95rem;
+  }
+}

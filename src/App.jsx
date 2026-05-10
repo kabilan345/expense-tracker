@@ -7,8 +7,7 @@ import AddEntryModal from "./components/AddEntryModal";
 import Toast from "./components/Toast";
 import "./App.css";
 import { db } from "./firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
-import { setDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import { useAuth } from "./Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -24,10 +23,6 @@ function App() {
   const [month, setMonth] = useState("");
   const [date, setDate] = useState("");
 
-  // 🌗 THEME STATE
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "dark"
-  );
 
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
@@ -53,11 +48,6 @@ useEffect(() => {
   }
 }, [month, salaryData]);
 
-  // 🌗 APPLY THEME
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   // 📦 Load Data
   useEffect(() => {
@@ -128,17 +118,27 @@ useEffect(() => {
     let balance = salaryData[month]?.amount || 0;
     let cat = {};
 
-    Object.values(days).forEach(entries => {
-      entries.forEach(e => {
-        if (e.type === "expense") {
-          total += e.amount;
-          cat[e.category] = (cat[e.category] || 0) + e.amount;
-          balance -= e.amount;
-        } else {
-          balance += e.amount;
-        }
-      });
-    });
+Object.values(days).forEach(entries => {
+  entries.forEach(e => {
+    if (e.type === "expense") {
+      total += e.amount;
+      cat[e.category] = (cat[e.category] || 0) + e.amount;
+      balance -= e.amount;
+    } else {
+      // Credit: reduce from that category if it exists, increase balance
+      if (cat[e.category]) {
+        cat[e.category] = Math.max(0, cat[e.category] - e.amount);
+      }
+      balance += e.amount;
+      total = Math.max(0, total - e.amount); // net expense reduces
+    }
+  });
+});
+
+// Remove categories that netted to 0
+Object.keys(cat).forEach(k => {
+  if (cat[k] === 0) delete cat[k];
+});
 
     setMonthly({
       expense: total,
@@ -149,7 +149,13 @@ useEffect(() => {
   }, [data, month, salaryData]);
 
   // ⏳ Loading
-  if (!month || !date) {
+// ✅ STEP 1: Wait for Firebase auth first
+if (loading) {
+  return <div>Loading...</div>;
+}
+
+// ✅ STEP 2: Then wait for date/month to be set
+if (!month || !date) {
   return <div>Loading...</div>;
 }
 
@@ -268,10 +274,6 @@ const editEntry = async (day, index, updatedEntry) => {
   setData(newData);
   showToast("Entry Updated", "warning");
 };
-
-if (loading) {
-  return <div>Loading...</div>;
-}
 
   return (
     <div className="app">

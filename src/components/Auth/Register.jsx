@@ -6,7 +6,7 @@ import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import maleprofile from '../../assets/male.jpeg';
 import femaleprofile from '../../assets/female.jpeg';
-import './Register.css';
+import './Auth.css';
 import { FaUser, FaEnvelope, FaLock, FaVenusMars } from 'react-icons/fa';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { db } from "../../firebase";
@@ -68,11 +68,11 @@ await setDoc(doc(db, "users", userCred.user.uid), {
   };
 
   return (
-    <div className="auth-page register-container">
+    <div className="auth-page">
       <div className="register-glass">
         {/* <img src={logo} alt="Logo" className="logo-spin" /> */}
-        <h2 className="title">Create Your Account</h2>
-        <p className="quote">“The future belongs to those who prepare for it today.”</p>
+        <h2 className="register-title">Create Your Account</h2>
+        <p className="register-quote">“The future belongs to those who prepare for it today.”</p>
 
         <form onSubmit={handleSubmit} className="register-form">
           <div className="input-group">
@@ -115,12 +115,12 @@ await setDoc(doc(db, "users", userCred.user.uid), {
           </button>
         </form>
 
-        <p className="login-redirect">
-          Already have an account?{' '}
-          <span className="login-link" onClick={() => navigate('/login')}>
-            Login here
-          </span>
-        </p>
+<p className="register-redirect">
+  Already have an account?{' '}
+  <span className="login-link" onClick={() => navigate('/login')}>
+    Login here
+  </span>
+</p>
       </div>
       <ToastContainer />
     </div>

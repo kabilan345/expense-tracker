@@ -6,7 +6,7 @@ import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import './Login.css';
+import './Auth.css';
 // import logo from '../../assets/logo.png';
 
 const Login = () => {
@@ -45,7 +45,7 @@ const Login = () => {
 
   return (
     <>
-    <div className="auth-page login-container">
+    <div className="auth-page">
       <div className="login-glass fade-in">
         {/* <img src={logo} alt="Logo" className="logo-spin" /> */}
         <h2 className="login-title">Welcome Back</h2>
